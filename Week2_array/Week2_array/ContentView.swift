@@ -1,21 +1,8 @@
-//
-//  ContentView.swift
-//  Week2_array
-//
-//  Created by MAY 02 on 21/9/26.
-//
-
 import SwiftUI
-
-struct PC: Identifiable {
-    var id: UUID = UUID()
-    var name: String
-    var location: String
-    var isAvailable: Bool
-}
 
 struct ContentView: View {
 
+    // Main PC array of the application
     @State private var pc: [PC] = [
         PC(name: "PC01", location: "Lab A", isAvailable: true),
         PC(name: "PC02", location: "Lab B", isAvailable: false),
@@ -27,44 +14,89 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Image(systemName: "desktopcomputer").font(.system(size: 50, weight: .bold)).foregroundStyle(.gray)
+                // Application header
+                Image(systemName: "desktopcomputer")
+                    .font(.system(size: 50, weight: .bold))
+                    .foregroundStyle(.gray)
+
                 Text("PC LAB").font(.largeTitle.bold())
-                Text("Hello user").foregroundStyle(.gray)
 
-                List(pc) { pc in
-                    HStack {
-                        Image(systemName: "desktopcomputer").foregroundStyle(.gray)
+                Text("Hello user")
+                    .foregroundStyle(.gray)
+                // Displays every PC stored in the array
+                List {
+                    ForEach(pc) { item in
+                        HStack {
+                            Image(systemName: "desktopcomputer")
+                                .foregroundStyle(.gray)
 
-                        VStack(alignment: .leading) {
-                            Text(pc.name).font(.headline)
-                            Text(pc.location).font(.subheadline).foregroundStyle(.secondary)
-                        }
+                            VStack(alignment: .leading) {
+                                Text(item.name).font(.headline)
+                                Text(item.location).font(.subheadline).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            // Shows the current PC status
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(item.isAvailable ? .green : .red)
+                                    .frame(width: 10, height: 10)
 
-                        Spacer()
-
-                        HStack(spacing: 6) {
-                            Circle().fill(pc.isAvailable ? .green : .red).frame(width: 10, height: 10)
-                            Text(pc.isAvailable ? "Available" : "In Use").foregroundStyle(pc.isAvailable ? .green : .red)
+                                Text(item.isAvailable ? "Available" : "In Use")
+                                    .foregroundStyle(item.isAvailable ? .green : .red)
+                            }
                         }
                     }
+                    .onDelete(perform: deletePC) // Optional: swipe to delete a PC
                 }
 
-                Button(action: {
-                    // add PC here
-                }) {
+                // Opens the Add PC screen
+                NavigationLink {
+                    AddPCView(pc: $pc)
+                } label: {
                     HStack {
-                        Image(systemName: "plus").foregroundStyle(.white)
+                        Image(systemName: "plus")
                         Text("Add PC")
                     }
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
 
+                // Opens the Check PC screen
+                NavigationLink {
+                    CheckPCView(pc: pc)
+                } label: {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                        Text("Check PC")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                // Opens the Statistics screen
+                NavigationLink {
+                    StatisticsView(pc: pc)
+                } label: {
+                    HStack {
+                        Image(systemName: "chart.bar.fill")
+                        Text("Statistics")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                // Displays the current number of computers
                 Text("Total computer: \(pc.count)")
+                    .foregroundStyle(.secondary)
             }
             .padding()
             .navigationTitle("")
         }
+    }
+
+    // Removes selected PCs from the array
+    private func deletePC(at offsets: IndexSet) {
+        pc.remove(atOffsets: offsets)
     }
 }
 
